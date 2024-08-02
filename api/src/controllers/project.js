@@ -5,6 +5,7 @@ const router = express.Router();
 const ProjectObject = require("../models/project");
 
 const SERVER_ERROR = "SERVER_ERROR";
+const PROJECT_NOT_FOUND = "PROJECT_NOT_FOUND"; 
 const PROJECT_ALREADY_EXISTS = "PROJECT_ALREADY_EXISTS";
 
 router.get("/list", passport.authenticate("user", { session: false }), async (req, res) => {
@@ -19,7 +20,8 @@ router.get("/list", passport.authenticate("user", { session: false }), async (re
 
 router.get("/:id", passport.authenticate("user", { session: false }), async (req, res) => {
   try {
-    const data = await ProjectObject.find({ _id: req.params.id });
+    const data = await ProjectObject.findOne({ _id: req.params.id });
+    if(!data) return  res.status(404).send({ ok: false, code: PROJECT_NOT_FOUND });
     return res.status(200).send({ ok: true, data });
   } catch (error) {
     console.log(error);
