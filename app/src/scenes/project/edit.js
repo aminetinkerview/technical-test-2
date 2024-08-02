@@ -15,11 +15,8 @@ export default function EditProject() {
   const { id } = useParams();
 
   useEffect(() => {
-    (async () => {
-      const { data: u } = await api.get(`/project/${id}`);
-      setProject(u);
-    })();
-  }, []);
+    api.get(`/project/${id}`).then((response) => setProject(response.data)).catch((error) => console.log(error));
+  }, [api, id]);
 
   const history = useHistory();
 
@@ -28,7 +25,7 @@ export default function EditProject() {
     if (!confirm) return;
     await api.remove(`/project/${id}`);
     toast.success("successfully removed!");
-    history.push("/projects");
+    history.push("/project");
   }
 
   if (!project) return <Loader />;
