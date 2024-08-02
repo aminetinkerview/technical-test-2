@@ -10,12 +10,15 @@ import api from "../../services/api";
 export default () => {
   const [user, setUser] = useState(null);
   const { id } = useParams();
+
   useEffect(() => {
-    (async () => {
-      const response = await api.get(`/user/${id}`);
+    api.get(`/user/${id}`).then((response) => {
       setUser(response.data);
-    })();
-  }, []);
+    }).catch((error) => {
+      // redirect to not found 404 page
+      console.log(error);
+    });
+  }, [api, id]);
 
   if (!user) return <Loader />;
 
@@ -31,18 +34,25 @@ export default () => {
 const Detail = ({ user }) => {
   const history = useHistory();
 
-  async function deleteData() {
-    const confirm = window.confirm("Are you sure ?");
-    if (!confirm) return;
-    await api.remove(`/user/${user._id}`);
-    toast.success("successfully removed!");
-    history.push(`/user`);
+  async function deleteData(e) {
+    e.preventDefault();
+    try {
+      const confirm = window.confirm("Are you sure ?");
+      if (!confirm) return;
+      await api.remove(`/user/${user._id}`);
+      toast.success("successfully removed!");
+      history.push(`/user`);
+    } catch (e) {
+      console.log(e);
+      toast.error("Some Error!");
+    }
   }
 
   return (
     <Formik
       initialValues={user}
       onSubmit={async (values) => {
+        console.log({ values });
         try {
           await api.put(`/user/${user._id}`, values);
           toast.success("Updated!");
@@ -53,14 +63,15 @@ const Detail = ({ user }) => {
       }}>
       {({ values, handleChange, handleSubmit, isSubmitting }) => {
         return (
-          <React.Fragment>
+          <form onSubmit={(e)=> {
+             handleSubmit();
+          }}>
             <div className="flex justify-between flex-wrap mt-4">
               <div className="w-full md:w-[260px] mt-[10px] md:mt-0 ">
                 <div className="text-[14px] text-[#212325] font-medium	">Name</div>
                 <input
                   className="projectsInput text-[14px] font-normal text-[#212325] bg-[#F9FBFD] rounded-[10px]"
                   name="name"
-                  disabled
                   value={values.name}
                   onChange={handleChange}
                 />
@@ -132,14 +143,14 @@ const Detail = ({ user }) => {
             </div>
 
             <div className="flex  mt-2">
-              <LoadingButton className="bg-[#0560FD] text-[16px] font-medium text-[#FFFFFF] py-[12px] px-[22px] rounded-[10px]" loading={isSubmitting} onChange={handleSubmit}>
+              <LoadingButton type="submit" className="bg-[#0560FD] text-[16px] font-medium text-[#FFFFFF] py-[12px] px-[22px] rounded-[10px]" loading={isSubmitting}>
                 Update
               </LoadingButton>
               <button className="ml-[10px] bg-[#F43F5E] text-[16px] font-medium text-[#FFFFFF] py-[12px] px-[22px] rounded-[10px]" onClick={deleteData}>
                 Delete
               </button>
             </div>
-          </React.Fragment>
+          </form>
         );
       }}
     </Formik>
