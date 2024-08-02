@@ -15,10 +15,9 @@ const ProjectList = () => {
   const history = useHistory();
 
   useEffect(() => {
-    (async () => {
-      const { data: u } = await api.get("/project");
-      setProjects(u);
-    })();
+    api.get("/project").then((response) => {
+      setProjects(response.data);
+    }).catch((error) => console.log(error));
   }, []);
 
   useEffect(() => {
@@ -95,6 +94,7 @@ const Budget = ({ project }) => {
 const Create = ({ onChangeSearch }) => {
   const [open, setOpen] = useState(false);
 
+  const history = useHistory();
   return (
     <div className="mb-[10px] ">
       <div className="flex justify-between flex-wrap">
@@ -141,9 +141,12 @@ const Create = ({ onChangeSearch }) => {
               initialValues={{}}
               onSubmit={async (values, { setSubmitting }) => {
                 try {
-                  values.status = "active";
-                  const res = await api.post("/project", values);
+                  const res = await api.post("/project", {
+                    ...(values || {}),
+                    status: "active"
+                  });
                   if (!res.ok) throw res;
+                  history.push(`/project/`);
                   toast.success("Created!");
                   setOpen(false);
                 } catch (e) {
