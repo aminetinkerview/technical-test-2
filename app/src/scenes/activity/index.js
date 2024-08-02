@@ -9,6 +9,7 @@ import SelectProject from "../../components/selectProject";
 import SelectMonth from "./../../components/selectMonth";
 
 import { getDaysInMonth } from "./utils";
+import { useHistory } from "react-router-dom/cjs/react-router-dom";
 
 const Activity = () => {
   const [date, setDate] = useState(null);
@@ -49,6 +50,7 @@ const Activity = () => {
 const Activities = ({ date, user, project }) => {
   const [activities, setActivities] = useState([]);
   const [open, setOpen] = useState(null);
+  const history = useHistory();
 
   useEffect(() => {
     (async () => {
@@ -97,7 +99,8 @@ const Activities = ({ date, user, project }) => {
     if (window.confirm("Are you sure ?")) {
       const activity = activities[i];
       await api.remove(`/activity/${activity._id}`);
-      toast.success(`Deleted ${activity.project}`);
+      toast.success(`Deleted ${activity.projectName}`);
+      history.push("/activity");
     }
   }
 
@@ -184,7 +187,7 @@ const Activities = ({ date, user, project }) => {
                               </div>
                               <div className="flex flex-col items-end">
                                 <div className="text-xs italic font-normal">{(e.total / 8).toFixed(2)} days</div>
-                                <div className="text-[10px] italic font-normal">{(((e.total / 8).toFixed(2) / getTotal()) * 100).toFixed(2)}%</div>
+                                <div className="text-[10px] italic font-normal">{((((e.total || 0) / 8).toFixed(2) / getTotal()) * 100).toFixed(2)}%</div>
                               </div>
                             </div>
                           </th>
